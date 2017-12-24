@@ -43,6 +43,14 @@ func updateRank(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "updating rank %d", zAdd.Val())
 }
 
+func topRanks(w http.ResponseWriter, r *http.Request) {
+	client := redisClient()
+
+	zRevRangeWithScores := client.ZRevRangeWithScores("leaderboard", 0, 9)
+
+	fmt.Fprintf(w, "topScores %v", zRevRangeWithScores.Val())
+}
+
 func redisClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -58,6 +66,7 @@ func main() {
 	r.HandleFunc("/leaderboard/{id}", viewLeaderboard).Methods("GET")
 	r.HandleFunc("/rank/{id}", viewRank).Methods("GET")
 	r.HandleFunc("/rank/{id}", updateRank).Methods("POST")
+	r.HandleFunc("/topranks", topRanks).Methods("GET")
 
 	http.ListenAndServe(":8080", r)
 }
