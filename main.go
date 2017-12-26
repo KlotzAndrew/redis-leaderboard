@@ -9,11 +9,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const leaderboard string = "leaderboard"
+
 func (a *app) viewRank(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	zRank := a.Redis.ZRank("leaderboard", id)
+	zRank := a.Redis.ZRank(leaderboard, id)
 	user := user{ID: id, Rank: zRank.Val()}
 
 	respondWithJSON(w, http.StatusOK, user)
@@ -23,18 +25,18 @@ func (a *app) viewLeaderboard(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	zRank := a.Redis.ZRank("leaderboard", id)
+	zRank := a.Redis.ZRank(leaderboard, id)
 
-	lower := zRank.Val() - 5
-	upper := zRank.Val() + 4
+	lower := zRank.Val() - 1
+	upper := zRank.Val() + 1
 
-	zRangeWithScores := a.Redis.ZRangeWithScores("leaderboard", lower, upper)
+	zRangeWithScores := a.Redis.ZRangeWithScores(leaderboard, lower, upper)
 
 	users := []user{}
 	for _, data := range zRangeWithScores.Val() {
 		member, _ := data.Member.(string)
 
-		user := user{ID: data.Member, Score: data.Score}
+		user := user{ID: member, Score: data.Score}
 		users = append(users, user)
 	}
 
@@ -45,14 +47,25 @@ func (a *app) updateRank(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	zAdd := a.Redis.ZAdd("leaderboard", redis.Z{100, id})
-	user := user{ID: id, Rank: zAdd.Val()}
+	newUser := new(user)
 
-	respondWithJSON(w, http.StatusOK, user)
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(newUser)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	zAdd := a.Redis.ZAdd(leaderboard, redis.Z{newUser.Score, id})
+	added, _ := zAdd.Result()
+
+	if added == int64(1) {
+		respondWithJSON(w, http.StatusOK, ``)
+	}
 }
 
 func (a *app) topRanks(w http.ResponseWriter, r *http.Request) {
-	zRevRangeWithScores := a.Redis.ZRevRangeWithScores("leaderboard", 0, 9)
+	zRevRangeWithScores := a.Redis.ZRevRangeWithScores(leaderboard, 0, 2)
 
 	users := []user{}
 	for _, data := range zRevRangeWithScores.Val() {
@@ -74,9 +87,9 @@ func respondWithJSON(w http.ResponseWriter, code int, user interface{}) {
 }
 
 type user struct {
-	ID    string  `json:"id"`
-	Rank  int64   `json:"rank"`
-	Score float64 `json:"score"`
+	ID    string  `json:"id,omitempty"`
+	Rank  int64   `json:"rank,omitempty"`
+	Score float64 `json:"score,omitempty"`
 }
 
 type app struct {
