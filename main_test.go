@@ -15,7 +15,7 @@ func TestGetRank(t *testing.T) {
 	a = app{}
 	a.initialize()
 
-	req, _ := http.NewRequest("GET", "/rank/5", nil)
+	req, _ := http.NewRequest("GET", "/user/5", nil)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -29,21 +29,21 @@ func TestUpdateRank(t *testing.T) {
 	a.initialize()
 
 	data := strings.NewReader(`{"score":123}`)
-	req, _ := http.NewRequest("POST", "/rank/5", data)
+	req, _ := http.NewRequest("POST", "/user/5", data)
 	response := executeRequest(req)
 
-	req, _ = http.NewRequest("GET", "/rank/5", nil)
+	req, _ = http.NewRequest("GET", "/user/5", nil)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 	checkResponseBody(t, `{"id":"5"}`, response.Body.String())
 
 	data = strings.NewReader(`{"score":121}`)
-	req, _ = http.NewRequest("POST", "/rank/6", data)
+	req, _ = http.NewRequest("POST", "/user/6", data)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 	checkResponseBody(t, `""`, response.Body.String())
 
-	req, _ = http.NewRequest("GET", "/rank/5", nil)
+	req, _ = http.NewRequest("GET", "/user/5", nil)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 	checkResponseBody(t, `{"id":"5","rank":1}`, response.Body.String())
@@ -57,7 +57,7 @@ func TestTopRanks(t *testing.T) {
 
 	insertUsers(10)
 
-	req, _ := http.NewRequest("GET", "/topranks", nil)
+	req, _ := http.NewRequest("GET", "/topusers", nil)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)

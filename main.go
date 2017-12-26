@@ -117,9 +117,9 @@ func (a *app) initialize() {
 // }
 func (a *app) initializeRoutes() {
 	a.Router.HandleFunc("/leaderboard/{id}", a.viewLeaderboard).Methods("GET")
-	a.Router.HandleFunc("/rank/{id}", a.viewRank).Methods("GET")
-	a.Router.HandleFunc("/rank/{id}", a.updateRank).Methods("POST")
-	a.Router.HandleFunc("/topranks", a.topRanks).Methods("GET")
+	a.Router.HandleFunc("/user/{id}", a.viewRank).Methods("GET")
+	a.Router.HandleFunc("/user/{id}", a.updateRank).Methods("POST")
+	a.Router.HandleFunc("/topusers", a.topRanks).Methods("GET")
 }
 
 func (a *app) run() {
