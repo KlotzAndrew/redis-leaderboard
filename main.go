@@ -108,13 +108,6 @@ func (a *app) initialize() {
 	a.initializeRoutes()
 }
 
-// "/product/{id:[0-9]+}"
-// vars := mux.Vars(r)
-// id, err := strconv.Atoi(vars["id"])
-// if err != nil {
-// 		respondWithError(w, http.StatusBadRequest, "Invalid Product ID")
-// 		return
-// }
 func (a *app) initializeRoutes() {
 	a.Router.HandleFunc("/leaderboard/{id}", a.viewLeaderboard).Methods("GET")
 	a.Router.HandleFunc("/user/{id}", a.viewRank).Methods("GET")
