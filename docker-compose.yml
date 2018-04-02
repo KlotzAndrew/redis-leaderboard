@@ -2,10 +2,7 @@ version: '3.1'
 
 services:
   web:
-    image: golang:1.10
-    volumes:
-      - .:/go/src/web
-    working_dir: /go/src/web
+    build: .
     ports:
       - "8080:8080"
     command: go run main.go
