@@ -98,7 +98,7 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 
 func checkResponseBody(t *testing.T, expected, actual string) {
 	if expected != actual {
-		t.Errorf("Expected response body %d. Got %d\n", expected, actual)
+		t.Errorf("Expected response body %q. Got %q\n", expected, actual)
 	}
 }
 
